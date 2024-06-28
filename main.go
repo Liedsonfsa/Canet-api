@@ -16,5 +16,5 @@ func main() {
 	fmt.Println(r)
 
 	fmt.Println(config.StringConexao)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%d:", config.Porta), r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Porta), r))
 }

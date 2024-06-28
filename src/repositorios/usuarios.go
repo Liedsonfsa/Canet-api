@@ -16,7 +16,7 @@ func NovoRepositorioDeUsuarios(db *sql.DB) *usuarios {
 
 // CriarUsuario cria um usuário no banco de dados
 func (repositorio usuarios) Criar(user models.Usuario) (uint64, error){
-	statement, err := repositorio.db.Prepare("INSERT INTO usuarios (nome, nick email, senha) VALUES(?, ?, ?, ?)")
+	statement, err := repositorio.db.Prepare("INSERT INTO usuarios (nome, nick, email, senha) VALUES(?, ?, ?, ?)")
 
 	if err != nil {
 		return 0, nil
