@@ -4,50 +4,75 @@ import (
 	"api/src/database"
 	"api/src/models"
 	"api/src/repositorios"
+	"api/src/responses"
 	"encoding/json"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"strings"
 )
 
 // CriarUsuario cria um usuário
 func CriarUsuario(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Criando Usuário."))
 	corpoRequest, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		responses.Erro(w, http.StatusUnprocessableEntity, err)
+		return
 	}
 
 	var user models.Usuario
 	if err = json.Unmarshal(corpoRequest, &user); err != nil {
-		log.Fatal(err)
+		responses.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = user.Preparar(); err != nil {
+		responses.Erro(w, http.StatusBadRequest, err)
+		return
 	}
 
 	db, err := database.Conectar()
 	if err != nil {
-		log.Fatal(err)
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
 	}
+
+	defer db.Close()
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
 
-	userID, err := repositorio.Criar(user)
+	user.ID, err = repositorio.Criar(user)
 	if err != nil {
-		log.Fatal(err)
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("ID inserido: %d\n", userID)))
+	responses.JSON(w, http.StatusCreated, user)
 }
-
 
 // BuscarUsuario busca um usuário
 func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Buscando Usuário."))
+	w.Write([]byte("Buscando um usuário."))
 }
 
-// BuscarUsuarios busca todos os usuário
+// BuscarUsuarios busca todos os usuários
 func BuscarUsuarios(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Buscando todos os usuários."))
+	nomeOrNick := strings.ToLower(r.URL.Query().Get("usuario"))
+	db, err := database.Conectar()
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	users, err := repositorio.Buscar(nomeOrNick)
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, users)
 }
 
 // AtualizarUsuario atualiza um usuário

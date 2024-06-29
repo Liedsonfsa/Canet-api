@@ -1,20 +1,21 @@
 package repositorios
 
 import (
-	"database/sql"
 	"api/src/models"
+	"database/sql"
+	"fmt"
 )
 
 type usuarios struct {
 	db *sql.DB
 }
 
-// NovoepositorioDeUsuarios cria um novo repositório de usuario
+// NovoepositorioDeUsuarios cria um novo repositório de usuarios
 func NovoRepositorioDeUsuarios(db *sql.DB) *usuarios {
 	return &usuarios{db}
 }
 
-// CriarUsuario cria um usuário no banco de dados
+// Criar insere um usuário no banco de dados
 func (repositorio usuarios) Criar(user models.Usuario) (uint64, error){
 	statement, err := repositorio.db.Prepare("INSERT INTO usuarios (nome, nick, email, senha) VALUES(?, ?, ?, ?)")
 
@@ -35,4 +36,29 @@ func (repositorio usuarios) Criar(user models.Usuario) (uint64, error){
 	}
 
 	return uint64(ultimoID), nil
+}
+
+// Buscar busca os usuários com um determinado nick ou nome
+func (repositorio usuarios) Buscar(nomeOrNick string) ([]models.Usuario, error) {
+	nomeOrNick = fmt.Sprintf("%%%s%%", nomeOrNick)
+
+	rows, err := repositorio.db.Query("SELECT id, nome, nick, email, criadoEm FROM usuarios WHERE nome LIKE ? or nick LIKE ?", nomeOrNick, nomeOrNick)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var users []models.Usuario
+
+	for rows.Next() {
+		var user models.Usuario
+		if err = rows.Scan(&user.ID, &user.Nome, &user.Nick, &user.Email, &user.CriadoEm); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
