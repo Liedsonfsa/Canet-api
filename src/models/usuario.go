@@ -17,8 +17,8 @@ type Usuario struct {
 }
 
 // Preparar vai reparar e validar as informaçõe do usuário
-func (user *Usuario) Preparar() error {
-	if err := user.validar(); err != nil {
+func (user *Usuario) Preparar(etapa string) error {
+	if err := user.validar(etapa); err != nil {
 		return err
 	}
 
@@ -26,7 +26,7 @@ func (user *Usuario) Preparar() error {
 	return nil
 }
 
-func (user *Usuario) validar() error {
+func (user *Usuario) validar(etapa string) error {
 	if user.Nome == "" {
 		return errors.New("o campo Nome é obrigatório")
 	}
@@ -39,7 +39,7 @@ func (user *Usuario) validar() error {
 		return errors.New("o campo Email deve ser preenchido")
 	}
 
-	if user.Senha == "" {
+	if user.Senha == "" && etapa == "cadastro" {
 		return errors.New("o campo Senha é obrigatório")
 	}
 
