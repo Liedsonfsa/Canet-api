@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"api/src/authentication"
 	"api/src/database"
 	"api/src/models"
 	"api/src/repositorios"
@@ -9,6 +10,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"fmt"
 )
 
 // Login é responsável por autenticar o usuário
@@ -39,10 +41,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = security.VerificarSenha(user.Senha, userOnDB.Senha); err != nil {
+	fmt.Printf("Senha com hash: %s\n", userOnDB.Senha)
+
+	if err = security.VerificarSenha(userOnDB.Senha, user.Senha); err != nil {
 		responses.Erro(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	w.Write([]byte("Você está logado"))
+	token, _ := authentication.CriarToken(userOnDB.ID)
+	fmt.Println(token)
+	w.Write([]byte(token))
 }
