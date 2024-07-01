@@ -64,7 +64,7 @@ func (repositorio usuarios) Buscar(nomeOrNick string) ([]models.Usuario, error) 
 }
 
 // BuscarPorID busca um único usuário por ID
-func (repositorio *usuarios) BuscarPorID(ID uint64) (models.Usuario, error) {
+func (repositorio usuarios) BuscarPorID(ID uint64) (models.Usuario, error) {
 	rows, err := repositorio.db.Query(
 		"SELECT id, nome, nick, email, criadoEm FROM usuarios WHERE id = ?", ID,
 	)
@@ -85,7 +85,7 @@ func (repositorio *usuarios) BuscarPorID(ID uint64) (models.Usuario, error) {
 }
 
 // Atualizar atualiza um usuário no banco de dados
-func (repositorio *usuarios) Atualizar(ID uint64, usuario models.Usuario) error {
+func (repositorio usuarios) Atualizar(ID uint64, usuario models.Usuario) error {
 	statement, err := repositorio.db.Prepare("UPDATE usuarios SET nome = ?, nick = ?, email = ? WHERE id = ?")
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (repositorio *usuarios) Atualizar(ID uint64, usuario models.Usuario) error 
 }
 
 // Deletar deleta as informações de um usuário no banco de dados
-func (repositorio *usuarios) Deletar(ID uint64) error {
+func (repositorio usuarios) Deletar(ID uint64) error {
 	statement, err := repositorio.db.Prepare("DELETE FROM usuarios WHERE id = ?")
 	if err != nil {
 		return err
@@ -112,4 +112,23 @@ func (repositorio *usuarios) Deletar(ID uint64) error {
 	}
 
 	return nil
+}
+
+// BuscarPorEmail nusca um usuário por email
+func (repositorio usuarios) BuscarPorEmail(email string) (models.Usuario, error) {
+	rows, err := repositorio.db.Query("SELECT id, senha FROM usuarios WHERE email = ?", email)
+	if err != nil {
+		return models.Usuario{}, err
+	}
+	defer rows.Close()
+
+	var user models.Usuario
+
+	if rows.Next() {
+		if err = rows.Scan(&user.ID, &user.Senha); err != nil {
+			return models.Usuario{}, err
+		}
+	}
+
+	return user, nil
 }

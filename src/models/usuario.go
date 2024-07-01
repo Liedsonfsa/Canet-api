@@ -25,13 +25,14 @@ func (user *Usuario) Preparar(etapa string) error {
 		return err
 	}
 
-	if err := user.formatar("cadastro"); err != nil {
+	if err := user.formatar(etapa); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
+// validar valida as informações do usuário
 func (user *Usuario) validar(etapa string) error {
 	if user.Nome == "" {
 		return errors.New("o campo Nome é obrigatório")
@@ -56,10 +57,11 @@ func (user *Usuario) validar(etapa string) error {
 	return nil
 }
 
+// formatar formata as informações do usuário
 func (user *Usuario) formatar(etapa string) error {
 	user.Nome = strings.TrimSpace(user.Nome)
-	user.Nick = strings.TrimSpace(user.Nome)
-	user.Email = strings.TrimSpace(user.Nome)
+	user.Nick = strings.TrimSpace(user.Nick)
+	user.Email = strings.TrimSpace(user.Email)
 
 	if etapa == "cadastro" {
 		senhaComHash, err := security.Hash(user.Senha)
