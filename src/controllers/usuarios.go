@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"api/src/authentication"
 	"api/src/database"
 	"api/src/models"
 	"api/src/repositorios"
 	"api/src/responses"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -106,6 +109,18 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 	usuarioID, err := strconv.ParseUint(parameters["usuarioId"], 10, 64)
 	if err != nil {
 		responses.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	tokenUserID, err := authentication.ExtractUserID(r)
+	if err != nil {
+		responses.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	fmt.Println(tokenUserID)
+	if tokenUserID != usuarioID {
+		responses.Erro(w, http.StatusForbidden, errors.New("você não tem autorização para autorizar esse usuário"))
 		return
 	}
 
