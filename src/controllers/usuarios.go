@@ -265,7 +265,7 @@ func PararDeSeguirUsuario(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
-// BuscarSeguidores
+// BuscarSeguidores busca todos os seguidores de um usuário
 func BuscarSeguidores(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	usuarioID, err := strconv.ParseUint(parameters["usuarioId"], 10, 64)
@@ -283,6 +283,32 @@ func BuscarSeguidores(w http.ResponseWriter, r *http.Request) {
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
 	seguidores, err := repositorio.BuscarSeguidores(usuarioID)
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, seguidores)
+}
+
+// BuscarQuemSigo busca todas as pessoas que um determinado usuário segue
+func BuscarQuemSigo(w http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	usuarioID, err := strconv.ParseUint(parameters["usuarioId"], 10, 64)
+	if err != nil {
+		responses.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Conectar()
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	seguidores, err := repositorio.BuscarQuemSigo(usuarioID)
 	if err != nil {
 		responses.Erro(w, http.StatusInternalServerError, err)
 		return
