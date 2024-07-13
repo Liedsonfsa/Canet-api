@@ -6,6 +6,7 @@ import (
 	"api/src/models"
 	"api/src/repositorios"
 	"api/src/responses"
+	"api/src/security"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -315,4 +316,64 @@ func BuscarQuemSigo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(w, http.StatusOK, seguidores)
+}
+
+func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
+	usuarioIdToken, err := authentication.ExtractUserID(r)
+	if err != nil {
+		responses.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	parameters := mux.Vars(r)
+	usuarioId, err := strconv.ParseUint(parameters["usuarioId"], 10, 64)
+	if err != nil {
+		responses.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if usuarioIdToken != usuarioId {
+		responses.Erro(w, http.StatusForbidden, errors.New("não é possivél atualizar a senha do usuário"))
+		return
+	}
+
+	corpoRequisicao, err := io.ReadAll(r.Body)
+
+	var senha models.Senha
+	if err = json.Unmarshal(corpoRequisicao, &senha); err != nil {
+		responses.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Conectar()
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	senhaSalva, err := repositorio.BuscarSenha(usuarioId)
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err = security.VerificarSenha(senhaSalva, senha.Atual); err != nil {
+		responses.Erro(w, http.StatusUnauthorized, errors.New("a senha atual não condiz com a que está no banco"))
+		return
+	}
+
+	senhaComHash, err := security.Hash(senha.Nova)
+	if err != nil {
+		responses.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = repositorio.AtualizarSenha(usuarioId, string(senhaComHash)); err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, nil)
 }
