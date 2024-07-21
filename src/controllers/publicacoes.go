@@ -58,7 +58,27 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 }
 
 func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
+	usuarioID, err := authentication.ExtractUserID(r)
+	if err != nil {
+		responses.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
 
+	db, err := database.Conectar()
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDePublicacoes(db)
+	publicacoes, err := repositorio.Buscar(usuarioID)
+	if err != nil {
+		responses.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, publicacoes)
 }
 
 func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
