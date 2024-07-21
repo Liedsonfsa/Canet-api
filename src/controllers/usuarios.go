@@ -318,6 +318,7 @@ func BuscarQuemSigo(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, seguidores)
 }
 
+// AtualizarSenha atualiza a senha do usuário logado
 func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
 	usuarioIdToken, err := authentication.ExtractUserID(r)
 	if err != nil {

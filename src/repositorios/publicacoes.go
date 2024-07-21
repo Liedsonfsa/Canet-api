@@ -5,14 +5,17 @@ import (
 	"database/sql"
 )
 
+// Publicacoes armazena um ponteiro para bancos de dados
 type Publicacoes struct {
 	db *sql.DB
 }
 
+// NovoRepositorioDePublicacoes cria e retorna um novo repositório de publicações
 func NovoRepositorioDePublicacoes(db *sql.DB) *Publicacoes { 
 	return &Publicacoes{db}
 }
 
+// Criar insere uma publicação no banco de dados
 func (repositorio Publicacoes) Criar(publicacao models.Publicacao) (uint64, error) {
 	statement, err := repositorio.db.Prepare("INSERT INTO publicacoes (titulo, conteudo, autor_id) VALUES (?, ?, ?)")
 	if err != nil {
@@ -104,6 +107,7 @@ func (repositorio Publicacoes) Deletar(publicacaoID uint64) error {
 	return nil
 }
 
+// BuscarPorUsuario buscar as publicações de um usuário
 func (repositorio Publicacoes) BuscarPorUsuario(usuarioId uint64) ([]models.Publicacao, error) {
 	rows, err := repositorio.db.Query(`select p.*, u.nick from publicacoes p join usuarios u on u.id = p.autor_id where p.autor_id = ?`, usuarioId)
 	if err != nil {
@@ -126,6 +130,7 @@ func (repositorio Publicacoes) BuscarPorUsuario(usuarioId uint64) ([]models.Publ
 	return publicacoes, nil
 }
 
+// Curtir deica um like em uma publicação
 func (repositorio Publicacoes) Curtir(publicacaoID uint64) error {
 	statement, err := repositorio.db.Prepare("update publicacoes set curtidas = curtidas + 1 where id = ?")
 	if err != nil {
@@ -140,6 +145,7 @@ func (repositorio Publicacoes) Curtir(publicacaoID uint64) error {
 	return nil
 }
 
+// Descurtir retira o like de uma publicação
 func (repositorio Publicacoes) Descurtir(publicacaoID uint64) error {
 	statement, err := repositorio.db.Prepare("update publicacoes set curtidas = case when curtidas > 0 then curtidas - 1 else curtidas end where id = ?")
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql" // Driver
 )
 
+// Conectar cria, estabelece e retorna uma conexão com o banco de dados
 func Conectar() (*sql.DB, error) {
 	db, err := sql.Open("mysql", config.StringConexao)
 

@@ -60,6 +60,7 @@ func ExtractUserID(r *http.Request) (uint64, error) {
 	return 0, errors.New("token inválido")
 }
 
+// extractToken extrai as informações do token
 func extractToken(r *http.Request) string {
 	token := r.Header.Get("Authorization")
 
@@ -70,6 +71,7 @@ func extractToken(r *http.Request) string {
 	return ""
 }
 
+// returnVerificationKey retorna a chave de verificação de token
 func returnVerificationKey(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("método de assinatura inesperado: %v", token.Header["alg"])

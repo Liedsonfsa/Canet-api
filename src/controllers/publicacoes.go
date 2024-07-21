@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// CriarPublicacao cria uma publicação
 func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 	usuarioId, err := authentication.ExtractUserID(r)
 	if err != nil {
@@ -58,6 +59,7 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, publicacao)
 }
 
+// BuscarPublicacoes busca as publicações que vão aparecer no feed do usuário
 func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
 	usuarioID, err := authentication.ExtractUserID(r)
 	if err != nil {
@@ -82,6 +84,7 @@ func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, publicacoes)
 }
 
+// BuscarPublicacao busca uma publicação de um usuário
 func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	publicacaoID, err := strconv.ParseUint(parameters["publicacaoId"], 10, 64)
@@ -107,6 +110,7 @@ func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, publicacao)
 }
 
+// AtualizarPublicao atualiza uma publicação do usuário logado
 func AtualizarPublicao(w http.ResponseWriter, r *http.Request) {
 	usuarioID, err := authentication.ExtractUserID(r)
 	if err != nil {
@@ -165,6 +169,7 @@ func AtualizarPublicao(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
+// DeletarPublicacao deleta uma publicação do usuário logado
 func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
 	usuarioID, err := authentication.ExtractUserID(r)
 	if err != nil {
@@ -206,6 +211,7 @@ func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
+// BuscarPublicacoesPorUsuario busca todas as publicações de um usuário
 func BuscarPublicacoesPorUsuario(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	usuarioID, err := strconv.ParseUint(parameters["usuarioId"], 10, 64)
@@ -231,6 +237,7 @@ func BuscarPublicacoesPorUsuario(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, publicacoes)
 }
 
+// CurtirPublicacao deixa o like em uma publicação
 func CurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	publicacaoID, err := strconv.ParseUint(parameters["publicacaoId"], 10, 64)
@@ -255,6 +262,7 @@ func CurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusNoContent, nil)
 }
 
+// DescurtirPublicacao retira o like de uma publicação
 func DescurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
 	publicacaoID, err := strconv.ParseUint(parameters["publicacaoId"], 10, 64)
