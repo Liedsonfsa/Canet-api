@@ -52,7 +52,7 @@ func (repositorio Publicacoes) BuscarPorID(publicacaoID uint64) (models.Publicac
 }
 
 // Buscar buscar todas as publicações do usuário e das pessoas que ele segue
-func (repositorio *Publicacoes) Buscar(usuarioID uint64) ([]models.Publicacao, error) {
+func (repositorio Publicacoes) Buscar(usuarioID uint64) ([]models.Publicacao, error) {
 	rows, err := repositorio.db.Query(`select distinct p.*, u.nick from publicacoes p inner join usuarios u on u.id = p.autor_id inner join seguidores s on p.autor_id = s.usuario_id where u.id = ? or seguidor_id = ? order by 1 desc`, usuarioID, usuarioID)
 	if err != nil {
 		return nil, err
@@ -72,4 +72,18 @@ func (repositorio *Publicacoes) Buscar(usuarioID uint64) ([]models.Publicacao, e
 	}
 
 	return publicacoes, nil
+}
+
+func (repositorio Publicacoes) Atualizar(publicacaoID uint64, publicacao models.Publicacao) error {
+	statement, err := repositorio.db.Prepare("update publicacoes set titulo = ?, conteudo = ? where id = ?")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(publicacao.Titulo, publicacao.Conteudo, publicacaoID); err != nil {
+		return err
+	}
+
+	return nil
 }
