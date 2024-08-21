@@ -1,3 +1,3 @@
 # Canet-api
 
-API do projeto Canet, uma rede social.
+API do projeto Canet.
