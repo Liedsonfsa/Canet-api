@@ -20,19 +20,19 @@ func (repositorio usuarios) Criar(user models.Usuario) (uint64, error){
 	statement, err := repositorio.db.Prepare("INSERT INTO usuarios (nome, nick, email, senha) VALUES(?, ?, ?, ?)")
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	defer statement.Close()
 	result, err := statement.Exec(user.Nome, user.Nick, user.Email, user.Senha)
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	ultimoID, err := result.LastInsertId()
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return uint64(ultimoID), nil
