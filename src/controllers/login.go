@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"fmt"
+	"strconv"
 )
 
 // Login é responsável por autenticar o usuário
@@ -41,8 +41,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Senha com hash: %s\n", userOnDB.Senha)
-
 	if err = security.VerificarSenha(userOnDB.Senha, user.Senha); err != nil {
 		responses.Erro(w, http.StatusUnauthorized, err)
 		return
@@ -53,6 +51,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		responses.Erro(w, http.StatusInternalServerError, err)
 		return
 	}
-	
-	w.Write([]byte(token))
+
+	usuarioID := strconv.FormatUint(userOnDB.ID, 10)
+	responses.JSON(w, http.StatusOK, models.DatasAuthentication{ID: usuarioID, Token: token})
 }
